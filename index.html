@@ -81,21 +81,51 @@
             opacity: 0.8;
         }
         
-        /* Seção de destaque */
+        /* Seção de destaque com carrossel */
         .hero {
-            background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('/api/placeholder/1200/600') center/cover no-repeat;
             height: 100vh;
             display: flex;
             align-items: center;
             text-align: center;
             color: white;
             position: relative;
+            overflow: hidden;
+        }
+        
+        .hero-slide {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            opacity: 0;
+            transition: opacity 1.5s ease-in-out;
+            z-index: -1;
+        }
+        
+        .hero-slide.active {
+            opacity: 1;
+        }
+        
+        .hero-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: -1;
         }
         
         .hero-content {
             max-width: 800px;
             margin: 0 auto;
             padding: 0 15px;
+            position: relative;
+            z-index: 10;
         }
         
         .hero h1 {
@@ -136,6 +166,7 @@
             font-size: 1.1rem;
             transition: all 0.3s ease;
             margin-top: 1rem;
+            margin-bottom: 2rem; /* Aumentando o espaço entre os botões */
             box-shadow: 0 4px 10px rgba(37, 211, 102, 0.3);
         }
         
@@ -397,8 +428,16 @@
         </div>
     </header>
 
-    <!-- Seção de Destaque -->
+    <!-- Seção de Destaque com Carrossel -->
     <section class="hero" id="inicio">
+        <!-- Slides do carrossel (placeholders) -->
+        <div class="hero-slide active" style="background-image: url('images/imagem1.jpg');"></div>
+        <div class="hero-slide" style="background-image: url('images/imagem2.jpg');"></div>
+        <div class="hero-slide" style="background-image: url('images/imagem3.jpg');"></div>
+        
+        <!-- Overlay escuro -->
+        <div class="hero-overlay"></div>
+        
         <div class="hero-content">
             <h1>Assistência Técnica em Informática</h1>
             <p>Oferecemos suporte técnico especializado para computadores, notebooks, videogames e eletrônicos em geral em Parobé e região do Vale do Paranhana.</p>
@@ -577,6 +616,19 @@
                 }
             });
         });
+        
+        // Carrossel de imagens
+        const slides = document.querySelectorAll('.hero-slide');
+        let currentSlide = 0;
+        
+        function nextSlide() {
+            slides[currentSlide].classList.remove('active');
+            currentSlide = (currentSlide + 1) % slides.length;
+            slides[currentSlide].classList.add('active');
+        }
+        
+        // Troca de imagem a cada 5 segundos
+        setInterval(nextSlide, 5000);
     </script>
 </body>
 </html>
