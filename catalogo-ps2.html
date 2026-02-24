@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Catálogo de PS2</title>
+    <style>
+        :root {
+            /* Trocamos o verde do Xbox pelo Azul Clássico do PlayStation */
+            --primary: #003791; 
+            --primary-hover: #00225e;
+            --bg: #121212;
+            --card-bg: #1E1E1E;
+            --text: #FFFFFF;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 0;
+            padding-bottom: 100px;
+        }
+        header {
+            background-color: var(--primary);
+            padding: 15px;
+            text-align: center;
+            font-size: 1.2rem;
+            font-weight: bold;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.5);
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .search-bar {
+            width: 90%;
+            max-width: 400px;
+            margin: 0 auto;
+            padding: 8px 15px;
+            border-radius: 20px;
+            border: none;
+            outline: none;
+            font-size: 1rem;
+            background-color: #FFFFFF;
+            color: #000000;
+        }
+        .container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 15px;
+            padding: 15px;
+        }
+        .game-card {
+            background-color: var(--card-bg);
+            border-radius: 8px;
+            overflow: hidden;
+            position: relative;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            border: 2px solid transparent;
+            display: flex;
+            flex-direction: column;
+        }
+        .game-card.selected {
+            border-color: var(--primary);
+            box-shadow: 0 0 15px rgba(0, 55, 145, 0.6);
+            transform: scale(0.98);
+        }
+        .game-card img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            background-color: #333;
+        }
+        .game-info {
+            padding: 10px;
+            text-align: center;
+            font-size: 0.9rem;
+            flex-grow: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .check-icon {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: var(--primary);
+            color: white;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+        .game-card.selected .check-icon {
+            opacity: 1;
+        }
+        
+        .custom-games-section {
+            padding: 20px 15px;
+            background-color: #1a1a1a;
+            margin: 15px;
+            border-radius: 8px;
+            border: 1px dashed #555;
+        }
+        .custom-games-section h3 {
+            margin-top: 0;
+            font-size: 1.1rem;
+            color: #60a5fa; /* Azul claro para o texto */
+        }
+        .custom-games-section p {
+            font-size: 0.9rem;
+            color: #ccc;
+            margin-bottom: 10px;
+        }
+        .custom-games-section textarea {
+            width: 100%;
+            box-sizing: border-box;
+            background-color: #222;
+            color: white;
+            border: 1px solid #444;
+            border-radius: 5px;
+            padding: 10px;
+            font-family: inherit;
+            resize: vertical;
+        }
+        .custom-games-section textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .bottom-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background-color: var(--card-bg);
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.5);
+        }
+        .whatsapp-btn {
+            background-color: #25D366;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 1rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .whatsapp-btn:hover { background-color: #1DA851; }
+        .hidden { display: none !important; }
+
+        #toast {
+            visibility: hidden;
+            min-width: 250px;
+            background-color: #333;
+            color: #fff;
+            text-align: center;
+            border-radius: 8px;
+            padding: 16px;
+            position: fixed;
+            z-index: 1000;
+            left: 50%;
+            bottom: 80px;
+            transform: translateX(-50%);
+            font-size: 15px;
+            border-left: 5px solid #25D366;
+            box-shadow: 0px 4px 15px rgba(0,0,0,0.6);
+        }
+        #toast.show {
+            visibility: visible;
+            -webkit-animation: fadein 0.5s, fadeout 0.5s 3.5s;
+            animation: fadein 0.5s, fadeout 0.5s 3.5s;
+        }
+        @keyframes fadein {
+            from {bottom: 0; opacity: 0;}
+            to {bottom: 80px; opacity: 1;}
+        }
+        @keyframes fadeout {
+            from {bottom: 80px; opacity: 1;}
+            to {bottom: 0; opacity: 0;}
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div>Catálogo de PS2</div>
+        <input type="text" id="search-input" class="search-bar" placeholder="Buscar jogo..." onkeyup="filterGames()">
+    </header>
+
+    <div class="container" id="game-container"></div>
+
+    <div class="custom-games-section">
+        <h3>Não achou o jogo que queria?</h3>
+        <p>Escreva o nome de outros jogos de PS2 abaixo. Verificaremos a disponibilidade para você!</p>
+        <textarea id="custom-games-input" rows="3" placeholder="Ex: Black, Need for Speed..."></textarea>
+    </div>
+
+    <div class="bottom-bar">
+        <span id="counter-text">0 selecionados</span>
+        <button class="whatsapp-btn" onclick="copyToClipboard()">
+            📋 Copiar Lista
+        </button>
+    </div>
+
+    <div id="toast">Lista copiada com sucesso!<br>Agora é só colar na conversa do WhatsApp.</div>
+
+    <script>
+        // Lista de jogos do PS2 devidamente limpa e formatada
+        const gamesList = [
+            "187 Ride or Die", "25 to Life", "Ben 10: Protector of Earth", "Black",
+            "BMX XXX", "Bomba Patch 2025", "Bomba Patch 2026", "Bully", "Burnout 3: Takedown",
+            "Call of Duty 3", "Coleção Prince of Persia", "Coleção Retrô", "Crash of the Titans",
+            "Crash Tag Team Racing", "Crash Twinsanity", "Crazy Taxi", "Def Jam: Fight for NY",
+            "Devil Kings", "Devil May Cry", "Downhill Domination", "Dragon Ball Z: Budokai Tenkaichi 3",
+            "God Hand", "God of War", "God of War II", "GoldenEye: Rogue Agent", "Gran Turismo 4",
+            "Grand Theft Auto: San Andreas", "Guitar Hero II", "Guitar Hero III (Brazucas)", "Gun",
+            "Indiana Jones and the Staff of Kings", "Jet Li: Rise to Honor", "Just Cause", "Killzone",
+            "Kingdom Hearts Final Mix", "LEGO Batman: The Videogame", "LEGO Indiana Jones",
+            "Medal of Honor: Vanguard", "Men in Black II: Alien Escape", "Metal Gear Solid 3: Subsistence",
+            "Midnight Club 3: DUB Edition Remix", "Mortal Kombat: Armageddon", "Mortal Kombat: Shaolin Monks",
+            "Need for Speed Underground 2", "O Bicho Vai Pegar (Open Season)", "PES 2013", "Ratatouille",
+            "Ratchet & Clank: Going Commando", "Red Dead Revolver", "Resident Evil 4", "Shadow of the Colossus",
+            "Spy vs. Spy", "SSX 3", "Stuart Little", "Super Bomba Patch 2025", "Tekken 5",
+            "Tony Hawk's Downhill Jam", "Toy Story 3", "Winning Eleven 10", "Winning Eleven Mix (Galvão Bueno)",
+            "Yakuza", "Yakuza 2"
+        ].sort();
+
+        let selectedGames = new Set();
+
+        function getBingCoverUrl(gameName) {
+            // Adaptado para buscar capas especificamente de PS2
+            const searchQuery = encodeURIComponent(gameName + " ps2 capa");
+            return `https://tse2.mm.bing.net/th?q=${searchQuery}&w=300&h=420&c=7&rs=1&p=0&dpr=1&pid=1.7`;
+        }
+
+        function renderGames() {
+            const container = document.getElementById('game-container');
+            
+            gamesList.forEach((game, index) => {
+                const card = document.createElement('div');
+                card.className = 'game-card';
+                card.id = `card-${index}`;
+                card.onclick = () => toggleSelection(card, game);
+
+                const coverUrl = getBingCoverUrl(game);
+
+                card.innerHTML = `
+                    <div class="check-icon">✓</div>
+                    <img src="${coverUrl}" alt="${game}" loading="lazy">
+                    <div class="game-info">${game}</div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function filterGames() {
+            const searchText = document.getElementById('search-input').value.toLowerCase();
+            const cards = document.getElementsByClassName('game-card');
+            
+            gamesList.forEach((game, index) => {
+                if (game.toLowerCase().includes(searchText)) {
+                    cards[index].classList.remove('hidden');
+                } else {
+                    cards[index].classList.add('hidden');
+                }
+            });
+        }
+
+        function toggleSelection(card, gameName) {
+            if (selectedGames.has(gameName)) {
+                selectedGames.delete(gameName);
+                card.classList.remove('selected');
+            } else {
+                selectedGames.add(gameName);
+                card.classList.add('selected');
+            }
+            updateCounter();
+        }
+
+        function updateCounter() {
+            document.getElementById('counter-text').innerText = `${selectedGames.size} selecionado${selectedGames.size !== 1 ? 's' : ''}`;
+        }
+
+        function showToast() {
+            const toast = document.getElementById("toast");
+            toast.className = "show";
+            setTimeout(function(){ toast.className = toast.className.replace("show", ""); }, 4000);
+        }
+
+        function fallbackCopyTextToClipboard(text) {
+            var textArea = document.createElement("textarea");
+            textArea.value = text;
+            textArea.style.top = "0";
+            textArea.style.left = "0";
+            textArea.style.position = "fixed";
+
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+
+            try {
+                var successful = document.execCommand('copy');
+                if (successful) {
+                    showToast();
+                } else {
+                    alert("Seu navegador bloqueou a cópia. Por favor, selecione e copie o texto manualmente.");
+                }
+            } catch (err) {
+                alert("Erro ao copiar. Por favor, selecione e copie manualmente.");
+            }
+
+            document.body.removeChild(textArea);
+        }
+
+        function copyToClipboard() {
+            const customGamesText = document.getElementById('custom-games-input').value.trim();
+            
+            if (selectedGames.size === 0 && customGamesText === "") {
+                alert("Selecione pelo menos um jogo ou digite o nome na caixa de texto!");
+                return;
+            }
+
+            // Adaptado para informar que são jogos de PS2
+            let message = "Olá! Gostaria de solicitar os seguintes jogos de PS2:\n\n";
+            
+            if (selectedGames.size > 0) {
+                message += "🎮 *Jogos do Catálogo (PS2):*\n";
+                selectedGames.forEach(game => {
+                    message += `- ${game}\n`;
+                });
+            }
+
+            if (customGamesText !== "") {
+                message += "\n📝 *Jogos Extras / Pedidos Especiais:*\n";
+                message += customGamesText + "\n";
+            }
+
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(message).then(() => {
+                    showToast();
+                }).catch(err => {
+                    fallbackCopyTextToClipboard(message);
+                });
+            } else {
+                fallbackCopyTextToClipboard(message);
+            }
+        }
+
+        renderGames();
+    </script>
+</body>
+</html>
