@@ -166,7 +166,7 @@
             font-size: 1.1rem;
             transition: all 0.3s ease;
             margin-top: 1rem;
-            margin-bottom: 2rem; /* Aumentando o espaço entre os botões */
+            margin-bottom: 2rem; 
             box-shadow: 0 4px 10px rgba(37, 211, 102, 0.3);
         }
         
@@ -405,7 +405,6 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
 </head>
 <body>
-    <!-- Cabeçalho -->
     <header>
         <div class="container">
             <nav>
@@ -422,32 +421,30 @@
                     <li><a href="#inicio">Início</a></li>
                     <li><a href="#sobre">Sobre Nós</a></li>
                     <li><a href="#servicos">Serviços</a></li>
+                    <li><a href="catalogo-xbox.html" style="color: #4ade80;">Catálogo Xbox</a></li>
+                    <li><a href="catalogo-ps2.html" style="color: #60a5fa;">Catálogo PS2</a></li>
                     <li><a href="#contato">Contato</a></li>
                 </ul>
             </nav>
         </div>
     </header>
 
-    <!-- Seção de Destaque com Carrossel -->
     <section class="hero" id="inicio">
-        <!-- Slides do carrossel (placeholders) -->
         <div class="hero-slide active" style="background-image: url('images/imagem1.jpg');"></div>
         <div class="hero-slide" style="background-image: url('images/imagem2.jpg');"></div>
         <div class="hero-slide" style="background-image: url('images/imagem3.jpg');"></div>
         
-        <!-- Overlay escuro -->
         <div class="hero-overlay"></div>
         
         <div class="hero-content">
             <h1>Assistência Técnica em Informática</h1>
             <p>Oferecemos suporte técnico especializado para computadores, notebooks, videogames e eletrônicos em geral em Parobé e região do Vale do Paranhana.</p>
-            <a href="https://api.whatsapp.com/send?phone=555195370561&text&context=AfecN5IpBSA5zIB1FV6LrDoveRcjZW6e78pOanYwr44TkhDsOcTeXNwOShAgwt32rpybIFrI4dKRKYCbN_vWMN-_nQrgO0fqEjhhDgCElI3O4TtT7rvzyU4KRSTmfKNQmXpNIpp2PZLMSbR6qafWLQ9YLA&source&app=facebook" class="whatsapp-btn" target="_blank"><i class="fab fa-whatsapp"></i> Chame no WhatsApp</a>
+            <a href="https://api.whatsapp.com/send?phone=555195370561&text=Ol%C3%A1%2C%20vim%20pelo%20site%20da%20Santech!" class="whatsapp-btn" target="_blank"><i class="fab fa-whatsapp"></i> Chame no WhatsApp</a>
             <br>
             <a href="#servicos" class="btn">Conheça nossos serviços</a>
         </div>
     </section>
 
-    <!-- Seção Sobre -->
     <section class="section" id="sobre">
         <div class="container">
             <div class="section-title">
@@ -461,7 +458,6 @@
         </div>
     </section>
 
-    <!-- Seção de Serviços -->
     <section class="section services" id="servicos">
         <div class="container">
             <div class="section-title">
@@ -483,13 +479,24 @@
                     <h3>Instalação de Câmeras IP</h3>
                     <p>Instalação e configuração de sistemas de monitoramento com câmeras IP. Acesso remoto pelo celular, gravação em nuvem e sistemas de segurança residencial e comercial.</p>
                 </div>
+                
                 <div class="service-card">
                     <div class="service-icon">
                         <i class="fas fa-gamepad"></i>
                     </div>
                     <h3>Videogames</h3>
                     <p>Manutenção e reparo de videogames modernos e retrô. Modificações, Instalação de jogos, atualizações de sistema e limpeza completa para melhorar o desempenho.</p>
+                    
+                    <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 20px;">
+                        <a href="catalogo-xbox.html" style="display: block; text-align: center; background: #107C10; color: white; padding: 12px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 0.95rem; transition: background 0.3s;" onmouseover="this.style.background='#0e6b0e'" onmouseout="this.style.background='#107C10'">
+                            <i class="fab fa-xbox"></i> Catálogo Xbox 360
+                        </a>
+                        <a href="catalogo-ps2.html" style="display: block; text-align: center; background: #003791; color: white; padding: 12px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 0.95rem; transition: background 0.3s;" onmouseover="this.style.background='#00225e'" onmouseout="this.style.background='#003791'">
+                            <i class="fab fa-playstation"></i> Catálogo PS2
+                        </a>
+                    </div>
                 </div>
+
                 <div class="service-card">
                     <div class="service-icon">
                         <i class="fas fa-volume-up"></i>
@@ -515,7 +522,6 @@
         </div>
     </section>
 
-    <!-- Seção de Contato -->
     <section class="section" id="contato">
         <div class="container">
             <div class="section-title">
@@ -540,7 +546,7 @@
                     <div>
                         <h3>Telefone / WhatsApp</h3>
                         <p>(51) 9537-0561</p>
-                        <a href="https://api.whatsapp.com/send?phone=555195370561&text&context=AfecN5IpBSA5zIB1FV6LrDoveRcjZW6e78pOanYwr44TkhDsOcTeXNwOShAgwt32rpybIFrI4dKRKYCbN_vWMN-_nQrgO0fqEjhhDgCElI3O4TtT7rvzyU4KRSTmfKNQmXpNIpp2PZLMSbR6qafWLQ9YLA&source&app=facebook" class="whatsapp-btn" target="_blank"><i class="fab fa-whatsapp"></i> Chamar no WhatsApp</a>
+                        <a href="https://api.whatsapp.com/send?phone=555195370561&text=Ol%C3%A1%2C%20vim%20pelo%20site%20da%20Santech!" class="whatsapp-btn" target="_blank"><i class="fab fa-whatsapp"></i> Chamar no WhatsApp</a>
                     </div>
                 </div>
                 <div class="contact-item">
@@ -556,7 +562,6 @@
         </div>
     </section>
 
-    <!-- Rodapé -->
     <footer>
         <div class="container">
             <div class="footer-content">
@@ -570,6 +575,8 @@
                         <li><a href="#inicio">Início</a></li>
                         <li><a href="#sobre">Sobre Nós</a></li>
                         <li><a href="#servicos">Serviços</a></li>
+                        <li><a href="catalogo-xbox.html">Catálogo Xbox 360</a></li>
+                        <li><a href="catalogo-ps2.html">Catálogo PS2</a></li>
                         <li><a href="#contato">Contato</a></li>
                     </ul>
                 </div>
@@ -578,12 +585,12 @@
                     <div class="social-links">
                         <a href="https://www.facebook.com/people/Santech-Inform%C3%A1tica/61559657609286/" target="_blank" class="facebook"><i class="fab fa-facebook-f"></i></a>
                         <a href="https://www.instagram.com/santechparobe/" target="_blank" class="instagram"><i class="fab fa-instagram"></i></a>
-                        <a href="https://api.whatsapp.com/send?phone=555195370561&text&context=AfecN5IpBSA5zIB1FV6LrDoveRcjZW6e78pOanYwr44TkhDsOcTeXNwOShAgwt32rpybIFrI4dKRKYCbN_vWMN-_nQrgO0fqEjhhDgCElI3O4TtT7rvzyU4KRSTmfKNQmXpNIpp2PZLMSbR6qafWLQ9YLA&source&app=facebook" target="_blank" class="whatsapp"><i class="fab fa-whatsapp"></i></a>
+                        <a href="https://api.whatsapp.com/send?phone=555195370561" target="_blank" class="whatsapp"><i class="fab fa-whatsapp"></i></a>
                     </div>
                 </div>
             </div>
             <div class="copyright">
-                <p>&copy; 2025 Santech Informática. Todos os direitos reservados.</p>
+                <p>&copy; 2026 Santech Informática. Todos os direitos reservados.</p>
             </div>
         </div>
     </footer>
