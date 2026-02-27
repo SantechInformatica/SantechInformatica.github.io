@@ -18,7 +18,7 @@
             color: var(--text);
             margin: 0;
             padding: 0;
-            padding-bottom: 100px;
+            padding-bottom: 140px; 
         }
         header {
             background-color: var(--primary);
@@ -34,10 +34,15 @@
             flex-direction: column;
             gap: 10px;
         }
-        .search-bar {
+        .controls-container {
+            display: flex;
+            gap: 10px;
             width: 90%;
-            max-width: 400px;
+            max-width: 500px;
             margin: 0 auto;
+        }
+        .search-bar {
+            flex-grow: 1;
             padding: 8px 15px;
             border-radius: 20px;
             border: none;
@@ -45,6 +50,16 @@
             font-size: 1rem;
             background-color: #FFFFFF;
             color: #000000;
+        }
+        .sort-select {
+            padding: 8px 10px;
+            border-radius: 20px;
+            border: none;
+            outline: none;
+            font-size: 0.9rem;
+            background-color: #e0e0e0;
+            color: #000000;
+            cursor: pointer;
         }
         .container {
             display: grid;
@@ -67,6 +82,7 @@
             border-color: var(--primary);
             box-shadow: 0 0 15px rgba(0, 55, 145, 0.6);
             transform: scale(0.98);
+            background-color: #1a2a42;
         }
         .game-card img {
             width: 100%;
@@ -80,8 +96,21 @@
             font-size: 0.9rem;
             flex-grow: 1;
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
+        }
+        .game-size {
+            font-size: 0.75rem;
+            color: #888;
+            margin-top: 5px;
+            background: #222;
+            padding: 2px 8px;
+            border-radius: 10px;
+        }
+        .game-card.selected .game-size {
+            color: #93c5fd;
+            background: rgba(0, 55, 145, 0.5);
         }
         .check-icon {
             position: absolute;
@@ -142,12 +171,51 @@
             left: 0;
             right: 0;
             background-color: var(--card-bg);
-            padding: 15px;
+            padding: 12px 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            box-shadow: 0 -5px 15px rgba(0,0,0,0.7);
+        }
+        .storage-section {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .storage-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            box-shadow: 0 -2px 10px rgba(0,0,0,0.5);
+            font-size: 0.9rem;
         }
+        .storage-select {
+            background: #333;
+            color: white;
+            border: 1px solid #555;
+            border-radius: 4px;
+            padding: 4px;
+            font-size: 0.85rem;
+            outline: none;
+        }
+        .progress-bg {
+            width: 100%;
+            height: 8px;
+            background: #333;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%;
+            background: #25D366;
+            width: 0%;
+            transition: width 0.3s ease, background-color 0.3s ease;
+        }
+        .bottom-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
         .whatsapp-btn {
             background-color: #25D366;
             color: white;
@@ -175,7 +243,7 @@
             position: fixed;
             z-index: 1000;
             left: 50%;
-            bottom: 80px;
+            bottom: 120px;
             transform: translateX(-50%);
             font-size: 15px;
             border-left: 5px solid #25D366;
@@ -188,10 +256,10 @@
         }
         @keyframes fadein {
             from {bottom: 0; opacity: 0;}
-            to {bottom: 80px; opacity: 1;}
+            to {bottom: 120px; opacity: 1;}
         }
         @keyframes fadeout {
-            from {bottom: 80px; opacity: 1;}
+            from {bottom: 120px; opacity: 1;}
             to {bottom: 0; opacity: 0;}
         }
     </style>
@@ -200,7 +268,15 @@
 
     <header>
         <div>Catálogo de PS2</div>
-        <input type="text" id="search-input" class="search-bar" placeholder="Buscar jogo..." onkeyup="filterGames()">
+        <div class="controls-container">
+            <input type="text" id="search-input" class="search-bar" placeholder="Buscar jogo..." onkeyup="applySortAndFilter()">
+            <select id="sort-select" class="sort-select" onchange="applySortAndFilter()">
+                <option value="az">A-Z</option>
+                <option value="za">Z-A</option>
+                <option value="size-asc">Menor Tamanho</option>
+                <option value="size-desc">Maior Tamanho</option>
+            </select>
+        </div>
     </header>
 
     <div class="container" id="game-container"></div>
@@ -212,51 +288,216 @@
     </div>
 
     <div class="bottom-bar">
-        <span id="counter-text">0 selecionados</span>
-        <button class="whatsapp-btn" onclick="copyToClipboard()">
-            📋 Copiar Lista
-        </button>
+        <div class="storage-section">
+            <div class="storage-header">
+                <span>Espaço Ocupado: <strong id="storage-text">0.0 GB</strong></span>
+                <select id="storage-select" class="storage-select" onchange="updateCounter()">
+                    <option value="7450000000">Pen Drive 8GB</option>
+                    <option value="14900000000">Pen Drive 16GB</option>
+                    <option value="29800000000">Pen Drive 32GB</option>
+                    <option value="59600000000" selected>Pen Drive 64GB</option>
+                    <option value="119200000000">Pen Drive 128GB</option>
+                    <option value="232800000000">HD 250GB</option>
+                    <option value="465600000000">HD 500GB</option>
+                    <option value="931300000000">HD 1TB</option>
+                </select>
+            </div>
+            <div class="progress-bg">
+                <div class="progress-fill" id="progress-fill"></div>
+            </div>
+        </div>
+
+        <div class="bottom-actions">
+            <span id="counter-text" style="font-weight: bold; color: #60a5fa;">0 selecionados</span>
+            <button class="whatsapp-btn" onclick="copyToClipboard()">
+                📋 Copiar Lista
+            </button>
+        </div>
     </div>
 
     <div id="toast">Lista copiada com sucesso!<br>Agora é só colar na conversa do WhatsApp.</div>
 
     <script>
-        // Lista limpa e exata com base nos arquivos do seu HD
-        const gamesList = [
-            "007: Agent Under Fire", "007: Everything or Nothing", "007: From Russia with Love", "007: Nightfire", "007: Quantum of Solace",
-            "4x4 Evolution", "Area 51", "Auto Modellista", "Batman Begins", "Battlefield 2: Modern Combat",
-            "Ben 10: Alien Force", "Ben 10: Protector of Earth", "Beyond Good & Evil", "Black", "BloodRayne",
-            "BloodRayne 2", "Bloody Roar 4", "Blowout", "BMX XXX", "Bomba Patch 2025",
-            "Bully", "Burnout 2: Point of Impact", "Burnout 3: Takedown", "Burnout Dominator", "Cabela's Dangerous Hunts 2",
-            "Call of Duty: World at War - Final Fronts", "Call of Duty 2: Big Red One", "Capcom Classics Collection Vol. 1", "Capcom vs. SNK 2", "Chronicles of Narnia: Prince Caspian",
-            "Cold Fear", "Coleção Retrô", "Contra: Shattered Soldier", "Crash Bandicoot: The Wrath of Cortex", "Crash Nitro Kart",
-            "Crazy Frog Arcade Racer", "Def Jam: Fight for NY", "Def Jam: Vendetta", "Devil May Cry 3: Special Edition", "Digimon Rumble Arena 2",
-            "Dirge of Cerberus: Final Fantasy VII", "Downhill Domination", "Dragon Ball Z: Budokai 3", "Dragon Ball Z: Budokai Tenkaichi 2", "Driver: Parallel Lines",
-            "Dynasty Warriors 5", "Fatal Frame II: Crimson Butterfly", "FIFA Street", "FIFA Street 2", "Final Fantasy XII",
-            "FlatOut 2", "G-Force", "Ghost Rider", "God Hand", "God of War",
-            "God of War II", "Gran Turismo 3: A-Spec", "Gran Turismo 4","Grand Theft Auto: Liberty City Stories", "Grand Theft Auto: Vice City", "Grand Theft Auto III",
-            "Grand Theft Auto: San Andreas", "Guitar Hero II", "Guitar Hero III (Brazucas)", "Ico", "Jackass: The Game",
-            "Jak 3", "Jak and Daxter: The Precursor Legacy", "Kingdom Hearts II", "LEGO Batman: The Videogame", "LEGO Indiana Jones",
-            "Mafia", "Manhunt", "Manhunt 2", "Marvel vs. Capcom 2", "Max Payne",
-            "Max Payne 2: The Fall of Max Payne", "Medal of Honor: European Assault", "Medal of Honor: Frontline", "Medal of Honor: Rising Sun", "Mercenaries: Playground of Destruction",
-            "Metal Gear Solid 2: Sons of Liberty", "Metal Slug Anthology", "Midnight Club 3: DUB Edition", "Mortal Kombat: Deadly Alliance", "Mortal Kombat: Deception",
-            "Mortal Kombat: Shaolin Monks", "Naruto: Ultimate Ninja", "Naruto: Ultimate Ninja 2", "Naruto: Ultimate Ninja 3", "Naruto: Uzumaki Chronicles",
-            "Naruto: Uzumaki Chronicles 2", "Naruto Shippuden: Ultimate Ninja 4", "Need for Speed: Carbon", "Need for Speed: Hot Pursuit 2", "Need for Speed: Most Wanted",
-            "Need for Speed: ProStreet", "Need for Speed: Undercover", "Need for Speed: Underground", "Need for Speed: Underground 2", "Obscure",
-            "Okami", "One Piece: Grand Adventure", "OutRun 2006: Coast 2 Coast", "Pac-Man World 2", "Peter Jackson's King Kong",
-            "The Punisher", "Ratatouille", "Ratchet & Clank", "Red Dead Revolver", "Resident Evil Code: Veronica X",
-            "Resident Evil: Outbreak", "Resident Evil 4", "Rumble Racing", "Scarface: The World is Yours", "Scooby-Doo! First Frights",
-            "Shadow of the Colossus", "Shrek 2", "Silent Hill 2", "Silent Hill 3", "Silent Hill 4: The Room",
-            "Silent Hill: Origins", "The Simpsons: Hit & Run", "Sly 2: Band of Thieves", "Sly 3: Honor Among Thieves", "SOCOM II: U.S. Navy SEALs",
-            "Sonic Riders", "Sonic Unleashed", "Spider-Man 2", "SpongeBob SquarePants: Battle for Bikini Bottom", "Star Wars: Battlefront II",
-            "Super Bomba Patch 2025", "Taz Wanted", "Teen Titans", "Teenage Mutant Ninja Turtles", "Tekken 4",
-            "Tekken 5", "Tomb Raider: Underworld", "Tony Hawk's American Wasteland", "Tony Hawk's Pro Skater 3", "Tony Hawk's Pro Skater 4",
-            "Tony Hawk's Underground 2", "Transformers", "True Crime: New York City", "True Crime: Streets of LA", "Valkyrie Profile 2: Silmeria",
-            "Vanguard", "Viewtiful Joe", "The Warriors", "Woody Woodpecker: Escape from Buzz Buzzard Park", "Winning Eleven 10",
-            "X-Men Legends II: Rise of Apocalypse", "Yu-Gi-Oh! The Duelists of the Roses"
-        ].sort();
+        // =====================================================================
+        // 🎮 ÁREA FÁCIL PARA ADICIONAR NOVOS JOGOS
+        // =====================================================================
+        // Regra: Se você adicionar um jogo apenas com o nome, sem o 'size:', 
+        // o sistema assumirá que ele pesa 4GB (4000000000 bytes) automaticamente.
+        
+        const rawGamesList = [
+            // Exemplo de jogo sem tamanho definido (Será 4.0 GB):
+            // { name: "Jogo Novo que eu Baixei" },
+
+            { name: "007: Agent Under Fire", size: 1630306304 },
+            { name: "007: Everything or Nothing", size: 3489366016 },
+            { name: "007: From Russia with Love", size: 4617732096 },
+            { name: "007: Nightfire", size: 2439315456 },
+            { name: "007: Quantum of Solace", size: 4677795840 },
+            { name: "4x4 Evolution", size: 549032149 },
+            { name: "Area 51", size: 3504472064 },
+            { name: "Auto Modellista", size: 1528102912 },
+            { name: "BMX XXX", size: 1531379712 },
+            { name: "Batman Begins", size: 2518712320 },
+            { name: "Battlefield 2: Modern Combat", size: 3614113792 },
+            { name: "Ben 10: Alien Force", size: 2351071232 },
+            { name: "Ben 10: Protector of Earth", size: 3400499200 },
+            { name: "Beyond Good & Evil", size: 2070544384 },
+            { name: "Black", size: 3919609856 },
+            { name: "BloodRayne", size: 1292075008 },
+            { name: "BloodRayne 2", size: 4691329024 },
+            { name: "Bloody Roar 4", size: 1294270464 },
+            { name: "Blowout", size: 350184655 },
+            { name: "Bomba Patch 2025", size: 3011346432 },
+            { name: "Bully", size: 4636835840 },
+            { name: "Burnout 2: Point of Impact", size: 4132634624 },
+            { name: "Burnout 3: Takedown", size: 2867822592 },
+            { name: "Burnout Dominator", size: 4218617856 },
+            { name: "Cabela's Dangerous Hunts 2", size: 4450353152 },
+            { name: "Call of Duty 2: Big Red One", size: 3646324736 },
+            { name: "Call of Duty: World at War - Final Fronts", size: 2786852864 },
+            { name: "Capcom Classics Collection Vol. 1", size: 3069411328 },
+            { name: "Capcom vs. SNK 2", size: 224133120 },
+            { name: "Chronicles of Narnia: Prince Caspian", size: 3321430016 },
+            { name: "Cold Fear", size: 3557785600 },
+            { name: "Coleção Retrô", size: 3734011904 },
+            { name: "Contra: Shattered Soldier", size: 751990957 },
+            { name: "Crash Bandicoot: The Wrath of Cortex", size: 538161229 },
+            { name: "Crash Nitro Kart", size: 3207397376 },
+            { name: "Crazy Frog Arcade Racer", size: 519860303 },
+            { name: "Def Jam: Fight for NY", size: 4694573056 },
+            { name: "Def Jam: Vendetta", size: 2216034304 },
+            { name: "Devil May Cry 3: Special Edition", size: 4410736640 },
+            { name: "Digimon Rumble Arena 2", size: 1333329920 },
+            { name: "Dirge of Cerberus: Final Fantasy VII", size: 4037083136 },
+            { name: "Downhill Domination", size: 2551840768 },
+            { name: "Dragon Ball Z: Budokai 3", size: 4657807360 },
+            { name: "Dragon Ball Z: Budokai Tenkaichi 2", size: 2998829056 },
+            { name: "Driver: Parallel Lines", size: 3872030720 },
+            { name: "Dynasty Warriors 5", size: 3721560064 },
+            { name: "FIFA Street", size: 4699062272 },
+            { name: "FIFA Street 2", size: 4698734592 },
+            { name: "Fatal Frame II: Crimson Butterfly", size: 3270836224 },
+            { name: "Final Fantasy XII", size: 4066508800 },
+            { name: "FlatOut 2", size: 3015073792 },
+            { name: "G-Force", size: 4295655424 },
+            { name: "Ghost Rider", size: 2637594624 },
+            { name: "God Hand", size: 1567686656 },
+            { name: "God of War", size: 4169467904 },
+            { name: "God of War II", size: 4266164224 },
+            { name: "Gran Turismo 3: A-Spec", size: 3878649856 },
+            { name: "Grand Theft Auto III", size: 4640997376 },
+            { name: "Grand Theft Auto: Liberty City Stories", size: 4010016768 },
+            { name: "Grand Theft Auto: San Andreas", size: 3951591424 },
+            { name: "Grand Theft Auto: Vice City", size: 4698767360 },
+            { name: "Guitar Hero II", size: 4646305792 },
+            { name: "Guitar Hero III (Brazucas)", size: 2609131520 },
+            { name: "Ico", size: 638640987 },
+            { name: "Jackass: The Game", size: 4164386816 },
+            { name: "Jak 3", size: 4516773888 },
+            { name: "Jak and Daxter: The Precursor Legacy", size: 1460535296 },
+            { name: "Kingdom Hearts II", size: 3966500864 },
+            { name: "LEGO Batman: The Videogame", size: 2152562688 },
+            { name: "LEGO Indiana Jones", size: 2409857024 },
+            { name: "Mafia", size: 4128538624 },
+            { name: "Manhunt", size: 4698767360 },
+            { name: "Manhunt 2", size: 2657058816 },
+            { name: "Marvel vs. Capcom 2", size: 239673615 },
+            { name: "Max Payne", size: 4374200320 },
+            { name: "Max Payne 2: The Fall of Max Payne", size: 2602237952 },
+            { name: "Medal of Honor: European Assault", size: 3857154048 },
+            { name: "Medal of Honor: Frontline", size: 3367927808 },
+            { name: "Medal of Honor: Rising Sun", size: 4602363904 },
+            { name: "Mercenaries: Playground of Destruction", size: 4696604672 },
+            { name: "Metal Gear Solid 2: Sons of Liberty", size: 4620910592 },
+            { name: "Metal Slug Anthology", size: 1375633408 },
+            { name: "Midnight Club 3: DUB Edition", size: 4605673472 },
+            { name: "Mortal Kombat: Deadly Alliance", size: 4685561856 },
+            { name: "Mortal Kombat: Deception", size: 4677500928 },
+            { name: "Mortal Kombat: Shaolin Monks", size: 2573991936 },
+            { name: "Naruto Shippuden: Ultimate Ninja 4", size: 4099506176 },
+            { name: "Naruto: Ultimate Ninja", size: 1515290624 },
+            { name: "Naruto: Ultimate Ninja 2", size: 4134338560 },
+            { name: "Naruto: Ultimate Ninja 3", size: 4045733888 },
+            { name: "Naruto: Uzumaki Chronicles", size: 1315307520 },
+            { name: "Naruto: Uzumaki Chronicles 2", size: 1291419648 },
+            { name: "Need for Speed: Carbon", size: 3698720768 },
+            { name: "Need for Speed: Hot Pursuit 2", size: 3121184768 },
+            { name: "Need for Speed: Most Wanted", size: 3702915072 },
+            { name: "Need for Speed: ProStreet", size: 3705667584 },
+            { name: "Need for Speed: Undercover", size: 3698786304 },
+            { name: "Need for Speed: Underground", size: 2726166528 },
+            { name: "Need for Speed: Underground 2", size: 2874605568 },
+            { name: "Obscure", size: 3119742976 },
+            { name: "Okami", size: 3967877120 },
+            { name: "One Piece: Grand Adventure", size: 1253179392 },
+            { name: "OutRun 2006: Coast 2 Coast", size: 1809907712 },
+            { name: "Pac-Man World 2", size: 1118175232 },
+            { name: "Peter Jackson's King Kong", size: 1303773184 },
+            { name: "Ratatouille", size: 1034551296 },
+            { name: "Ratchet & Clank", size: 4214095872 },
+            { name: "Red Dead Revolver", size: 2340487168 },
+            { name: "Resident Evil 4", size: 2899419136 },
+            { name: "Resident Evil Code: Veronica X", size: 1883996160 },
+            { name: "Resident Evil: Outbreak", size: 4698767360 },
+            { name: "Rumble Racing", size: 601453525 },
+            { name: "SOCOM II: U.S. Navy SEALs", size: 4380753920 },
+            { name: "Scarface: The World is Yours", size: 3791028224 },
+            { name: "Scooby-Doo! First Frights", size: 2660204544 },
+            { name: "Shadow of the Colossus", size: 2693955584 },
+            { name: "Shrek 2", size: 1264648192 },
+            { name: "Silent Hill 2", size: 4641193984 },
+            { name: "Silent Hill 3", size: 3584229376 },
+            { name: "Silent Hill 4: The Room", size: 3933929472 },
+            { name: "Silent Hill: Origins", size: 3074785280 },
+            { name: "The Simpsons: Hit & Run", size: 2154266624 },
+            { name: "Sly 2: Band of Thieves", size: 2884141056 },
+            { name: "Sly 3: Honor Among Thieves", size: 3553755136 },
+            { name: "Sonic Riders", size: 1905033216 },
+            { name: "Sonic Unleashed", size: 4680941568 },
+            { name: "Spider-Man 2", size: 4134502400 },
+            { name: "SpongeBob SquarePants: Battle for Bikini Bottom", size: 1240072192 },
+            { name: "Star Wars: Battlefront II", size: 4665671680 },
+            { name: "Super Bomba Patch 2025", size: 3210051584 },
+            { name: "Taz Wanted", size: 746983535 },
+            { name: "Teen Titans", size: 1233616896 },
+            { name: "Teenage Mutant Ninja Turtles", size: 1364033536 },
+            { name: "Tekken 4", size: 2698346496 },
+            { name: "Tekken 5", size: 4483547136 },
+            { name: "The Punisher", size: 1990492160 },
+            { name: "The Warriors", size: 4295917568 },
+            { name: "Tomb Raider: Underworld", size: 3184066560 },
+            { name: "Tony Hawk's American Wasteland", size: 4022337536 },
+            { name: "Tony Hawk's Pro Skater 3", size: 3240886272 },
+            { name: "Tony Hawk's Pro Skater 4", size: 3392929792 },
+            { name: "Tony Hawk's Underground 2", size: 3364945920 },
+            { name: "Transformers", size: 2900951040 },
+            { name: "True Crime: New York City", size: 3164733440 },
+            { name: "True Crime: Streets of LA", size: 2880700416 },
+            { name: "Valkyrie Profile 2: Silmeria", size: 4661706752 },
+            { name: "Vanguard", size: 1140359168 },
+            { name: "Viewtiful Joe", size: 2432663552 },
+            { name: "Winning Eleven 10", size: 2701262848 },
+            { name: "Woody Woodpecker: Escape from Buzz Buzzard Park", size: 514173205 },
+            { name: "X-Men Legends II: Rise of Apocalypse", size: 1758429184 },
+            { name: "Yu-Gi-Oh! The Duelists of the Roses", size: 2112782336 }
+        ];
+
+        // =====================================================================
+        // LÓGICA DO CATÁLOGO (Não precisa alterar nada daqui para baixo)
+        // =====================================================================
+        
+        const DEFAULT_SIZE = 4000000000; // 4 GB padrão para quem não tem tamanho
+        
+        // Processa a lista para garantir que todo jogo tenha tamanho
+        let processedGames = rawGamesList.map(game => {
+            return {
+                name: game.name,
+                size: game.size || DEFAULT_SIZE
+            };
+        });
 
         let selectedGames = new Set();
+        let currentDisplayedGames = [...processedGames];
 
         function getBingCoverUrl(gameName) {
             const searchQuery = encodeURIComponent(gameName + " ps2 capa");
@@ -265,35 +506,48 @@
 
         function renderGames() {
             const container = document.getElementById('game-container');
+            container.innerHTML = ''; // Limpa a tela antes de renderizar
             
-            gamesList.forEach((game, index) => {
+            currentDisplayedGames.forEach((game, index) => {
                 const card = document.createElement('div');
                 card.className = 'game-card';
-                card.id = `card-${index}`;
-                card.onclick = () => toggleSelection(card, game);
+                if (selectedGames.has(game.name)) card.classList.add('selected');
+                
+                card.onclick = () => toggleSelection(card, game.name);
 
-                const coverUrl = getBingCoverUrl(game);
+                const coverUrl = getBingCoverUrl(game.name);
+                const sizeGB = (game.size / 1000000000).toFixed(1);
 
                 card.innerHTML = `
                     <div class="check-icon">✓</div>
-                    <img src="${coverUrl}" alt="${game}" loading="lazy">
-                    <div class="game-info">${game}</div>
+                    <img src="${coverUrl}" alt="${game.name}" loading="lazy">
+                    <div class="game-info">
+                        ${game.name}
+                        <div class="game-size">${sizeGB} GB</div>
+                    </div>
                 `;
                 container.appendChild(card);
             });
         }
 
-        function filterGames() {
+        function applySortAndFilter() {
             const searchText = document.getElementById('search-input').value.toLowerCase();
-            const cards = document.getElementsByClassName('game-card');
+            const sortType = document.getElementById('sort-select').value;
             
-            gamesList.forEach((game, index) => {
-                if (game.toLowerCase().includes(searchText)) {
-                    cards[index].classList.remove('hidden');
-                } else {
-                    cards[index].classList.add('hidden');
-                }
+            // 1. Filtra por texto
+            let filtered = processedGames.filter(game => game.name.toLowerCase().includes(searchText));
+            
+            // 2. Ordena
+            filtered.sort((a, b) => {
+                if (sortType === 'az') return a.name.localeCompare(b.name);
+                if (sortType === 'za') return b.name.localeCompare(a.name);
+                if (sortType === 'size-asc') return a.size - b.size;
+                if (sortType === 'size-desc') return b.size - a.size;
+                return 0;
             });
+
+            currentDisplayedGames = filtered;
+            renderGames();
         }
 
         function toggleSelection(card, gameName) {
@@ -308,7 +562,35 @@
         }
 
         function updateCounter() {
+            let totalBytes = 0;
+            selectedGames.forEach(gameName => {
+                const game = processedGames.find(g => g.name === gameName);
+                if (game) totalBytes += game.size;
+            });
+
+            const selectElem = document.getElementById('storage-select');
+            const maxBytesReal = parseInt(selectElem.value); // Puxa o valor real descontado
+            
+            const totalGB = (totalBytes / 1000000000).toFixed(1);
+            const maxGB = (maxBytesReal / 1000000000).toFixed(1);
+            
+            document.getElementById('storage-text').innerText = `${totalGB} GB / ${maxGB} GB Livre`;
             document.getElementById('counter-text').innerText = `${selectedGames.size} selecionado${selectedGames.size !== 1 ? 's' : ''}`;
+
+            let percentage = (totalBytes / maxBytesReal) * 100;
+            const fillElem = document.getElementById('progress-fill');
+            fillElem.style.width = Math.min(percentage, 100) + '%';
+            
+            if (percentage > 100) {
+                fillElem.style.backgroundColor = '#dc2626'; 
+                document.getElementById('storage-text').style.color = '#dc2626';
+            } else if (percentage > 85) {
+                fillElem.style.backgroundColor = '#eab308'; 
+                document.getElementById('storage-text').style.color = 'inherit';
+            } else {
+                fillElem.style.backgroundColor = '#25D366'; 
+                document.getElementById('storage-text').style.color = 'inherit';
+            }
         }
 
         function showToast() {
@@ -330,13 +612,10 @@
 
             try {
                 var successful = document.execCommand('copy');
-                if (successful) {
-                    showToast();
-                } else {
-                    alert("Seu navegador bloqueou a cópia. Por favor, selecione e copie o texto manualmente.");
-                }
+                if (successful) showToast();
+                else alert("Seu navegador bloqueou a cópia. Copie manualmente.");
             } catch (err) {
-                alert("Erro ao copiar. Por favor, selecione e copie manualmente.");
+                alert("Erro ao copiar. Copie manualmente.");
             }
 
             document.body.removeChild(textArea);
@@ -350,6 +629,13 @@
                 return;
             }
 
+            let totalBytes = 0;
+            selectedGames.forEach(gameName => {
+                const game = processedGames.find(g => g.name === gameName);
+                if (game) totalBytes += game.size;
+            });
+            const totalGB = (totalBytes / 1000000000).toFixed(1);
+
             let message = "Olá! Gostaria de solicitar os seguintes jogos de PS2:\n\n";
             
             if (selectedGames.size > 0) {
@@ -357,6 +643,7 @@
                 selectedGames.forEach(game => {
                     message += `- ${game}\n`;
                 });
+                message += `\n💾 *Tamanho Estimado:* ${totalGB} GB\n`;
             }
 
             if (customGamesText !== "") {
@@ -375,8 +662,8 @@
             }
         }
 
-        renderGames();
+        applySortAndFilter(); // Inicia renderizando em ordem A-Z
+        updateCounter();
     </script>
 </body>
 </html>
-
