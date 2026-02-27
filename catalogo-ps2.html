@@ -208,7 +208,7 @@
     <div class="custom-games-section">
         <h3>Não achou o jogo que queria?</h3>
         <p>Escreva o nome de outros jogos de PS2 abaixo. Verificaremos a disponibilidade para você!</p>
-        <textarea id="custom-games-input" rows="3" placeholder="Ex: Guitar Hero 80s, Star Wars..."></textarea>
+        <textarea id="custom-games-input" rows="3" placeholder="Ex: Guitar Hero, King of Fighters..."></textarea>
     </div>
 
     <div class="bottom-bar">
@@ -221,70 +221,39 @@
     <div id="toast">Lista copiada com sucesso!<br>Agora é só colar na conversa do WhatsApp.</div>
 
     <script>
-        // Lista completa: Originais + 100 Clássicos + 50 BRs
+        // Lista limpa e exata com base nos arquivos do seu HD
         const gamesList = [
-            // --- JOGOS ORIGINAIS ---
-            "187 Ride or Die", "25 to Life", "Ben 10: Protector of Earth", "Black",
-            "BMX XXX", "Bomba Patch 2025", "Bomba Patch 2026", "Bully", "Burnout 3: Takedown",
-            "Call of Duty 3", "Coleção Prince of Persia", "Coleção Retrô", "Crash of the Titans",
-            "Crash Tag Team Racing", "Crash Twinsanity", "Crazy Taxi", "Def Jam: Fight for NY",
-            "Devil Kings", "Devil May Cry", "Downhill Domination", "Dragon Ball Z: Budokai Tenkaichi 3",
-            "God Hand", "God of War", "God of War II", "GoldenEye: Rogue Agent", "Gran Turismo 4",
-            "Grand Theft Auto: San Andreas", "Guitar Hero II", "Guitar Hero III (Brazucas)", "Gun",
-            "Indiana Jones and the Staff of Kings", "Jet Li: Rise to Honor", "Just Cause", "Killzone",
-            "Kingdom Hearts Final Mix", "LEGO Batman: The Videogame", "LEGO Indiana Jones",
-            "Medal of Honor: Vanguard", "Men in Black II: Alien Escape", "Metal Gear Solid 3: Subsistence",
-            "Midnight Club 3: DUB Edition Remix", "Mortal Kombat: Armageddon", "Mortal Kombat: Shaolin Monks",
-            "Need for Speed Underground 2", "O Bicho Vai Pegar (Open Season)", "PES 2013", "Ratatouille",
-            "Ratchet & Clank: Going Commando", "Red Dead Revolver", "Resident Evil 4", "Shadow of the Colossus",
-            "Spy vs. Spy", "SSX 3", "Stuart Little", "Super Bomba Patch 2025", "Tekken 5",
-            "Tony Hawk's Downhill Jam", "Toy Story 3", "Winning Eleven 10", "Winning Eleven Mix (Galvão Bueno)",
-            "Yakuza", "Yakuza 2",
-
-            // --- 100 CLÁSSICOS ---
-            "Area 51", "Batman Begins", "Beyond Good & Evil", "BloodRayne", "BloodRayne 2", 
-            "Burnout Revenge", "Burnout Dominator", "Call of Duty 2: Big Red One", "Call of Duty: World at War - Final Fronts", 
-            "Capcom Classics Collection", "Castlevania: Curse of Darkness", "Castlevania: Lament of Innocence", 
-            "Crash Bandicoot: The Wrath of Cortex", "Crash Nitro Kart", "Def Jam Vendetta", "Devil May Cry 2", 
-            "Devil May Cry 3: Special Edition", "Digimon Rumble Arena 2", "Dirge of Cerberus: Final Fantasy VII", 
-            "Dragon Ball Z: Budokai 3", "Dragon Ball Z: Budokai Tenkaichi 2", "Driver: Parallel Lines", 
-            "Dynasty Warriors 5", "Fatal Frame II: Crimson Butterfly", "Fatal Frame III: The Tormented", 
-            "FIFA Street", "FIFA Street 2", "Final Fantasy X", "Final Fantasy XII", "Gran Turismo 3: A-Spec", 
-            "Grand Theft Auto: Liberty City Stories", "Grand Theft Auto: Vice City", "Grand Theft Auto: Vice City Stories", 
-            "Hitman: Blood Money", "Ico", "Jak and Daxter: The Precursor Legacy", "Jak II", "Jak 3", "Kingdom Hearts II", 
-            "Mafia", "Manhunt", "Manhunt 2", "Marvel vs. Capcom 2", "Medal of Honor: European Assault", 
-            "Medal of Honor: Frontline", "Mercenaries: Playground of Destruction", "Metal Gear Solid 2: Sons of Liberty", 
-            "Mortal Kombat: Deadly Alliance", "Mortal Kombat: Deception", "Naruto: Ultimate Ninja 3", 
-            "Naruto: Ultimate Ninja 5", "Need for Speed: Carbon", "Need for Speed: Most Wanted", "Need for Speed: ProStreet", 
-            "Need for Speed: Undercover", "Need for Speed: Underground", "Obscure", "Okami", "Onimusha 3: Demon Siege", 
-            "Onimusha: Dawn of Dreams", "Persona 3 FES", "Persona 4", "Peter Jackson's King Kong", "Psychonauts", 
-            "Ratchet & Clank", "Ratchet & Clank: Up Your Arsenal", "Resident Evil Code: Veronica X", 
-            "Resident Evil Outbreak", "Scarface: The World Is Yours", "Silent Hill 2", "Silent Hill 3", 
-            "Silent Hill 4: The Room", "Silent Hill: Origins", "Silent Hill: Shattered Memories", "Sly 2: Band of Thieves", 
-            "Sly 3: Honor Among Thieves", "Sly Cooper and the Thievius Raccoonus", "Sonic Heroes", "Sonic Riders", 
-            "Sonic Unleashed", "Spider-Man 2", "SpongeBob SquarePants: Battle for Bikini Bottom", "Star Wars: Battlefront II", 
-            "Street Fighter Alpha Anthology", "Super Nintendo Station (Emulador SNES)", "Tekken 4", "Tekken Tag Tournament", 
-            "The Godfather", "The Punisher", "The Simpsons Hit & Run", "The Warriors", "Tomb Raider: Anniversary", 
-            "Tomb Raider: Legend", "Tomb Raider: Underworld", "Tony Hawk's American Wasteland", "Tony Hawk's Pro Skater 3", 
-            "Tony Hawk's Pro Skater 4", "Tony Hawk's Underground 2", "True Crime: New York City", 
-            "True Crime: Streets of LA", "Ultimate Spider-Man",
-
-            // --- 50 CLÁSSICOS BRASILEIROS ---
-            "007: Everything or Nothing", "007: Nightfire", "Auto Modellista", "Bleach: Blade Battlers 2nd", 
-            "Bloody Roar 4", "Capcom vs. SNK 2", "Cavaleiros do Zodíaco: O Santuário", "Cavaleiros do Zodíaco: Hades", 
-            "Clock Tower 3", "Contra: Shattered Soldier", "FlatOut 2", "Grand Theft Auto III", 
-            "Guitar Hero Encore: Rocks the 80s", "Guitar Hero: Aerosmith", "Guitar Hero: Metallica", 
-            "Marvel: Ultimate Alliance", "Max Payne", "Max Payne 2: The Fall of Max Payne", "Medal of Honor: Rising Sun", 
-            "Mega Drive Collection", "Metal Slug Anthology", "Mortal Kombat: Motor Kombat", 
-            "Naruto Shippuden: Ultimate Ninja 4", "Need for Speed: Hot Pursuit 2", 
-            "O Senhor dos Anéis: O Retorno do Rei", "Os Incríveis", "OutRun 2006: Coast 2 Coast", "Pac-Man World 2", 
-            "Rayman 3: Hoodlum Havoc", "Resident Evil: Dead Aim", "Resident Evil: Outbreak File #2", "Rock Band", 
-            "Rumble Racing", "Scooby-Doo! Night of 100 Frights", "Shrek 2", "SNK vs. Capcom: SVC Chaos", 
-            "SOCOM II: U.S. Navy SEALs", "Star Ocean: Till the End of Time", "Street Fighter EX3", "Tarzan Untamed", 
-            "Teenage Mutant Ninja Turtles", "The King of Fighters 2002", "The King of Fighters XI", 
-            "The King of Fighters: Maximum Impact 2", "The Matrix: Path of Neo", "Valkyrie Profile 2: Silmeria", 
-            "Viewtiful Joe", "X-Men Legends II: Rise of Apocalypse", "Yu-Gi-Oh! The Duelists of the Roses", 
-            "Yu Yu Hakusho: Dark Tournament"
+            "007: Agent Under Fire", "007: Everything or Nothing", "007: From Russia with Love", "007: Nightfire", "007: Quantum of Solace",
+            "4x4 Evolution", "Area 51", "Auto Modellista", "Batman Begins", "Battlefield 2: Modern Combat",
+            "Ben 10: Alien Force", "Ben 10: Protector of Earth", "Beyond Good & Evil", "Black", "BloodRayne",
+            "BloodRayne 2", "Bloody Roar 4", "Blowout", "BMX XXX", "Bomba Patch 2025",
+            "Bully", "Burnout 2: Point of Impact", "Burnout 3: Takedown", "Burnout Dominator", "Cabela's Dangerous Hunts 2",
+            "Call of Duty: World at War - Final Fronts", "Call of Duty 2: Big Red One", "Capcom Classics Collection Vol. 1", "Capcom vs. SNK 2", "Chronicles of Narnia: Prince Caspian",
+            "Cold Fear", "Coleção Retrô", "Contra: Shattered Soldier", "Crash Bandicoot: The Wrath of Cortex", "Crash Nitro Kart",
+            "Crazy Frog Arcade Racer", "Def Jam: Fight for NY", "Def Jam: Vendetta", "Devil May Cry 3: Special Edition", "Digimon Rumble Arena 2",
+            "Dirge of Cerberus: Final Fantasy VII", "Downhill Domination", "Dragon Ball Z: Budokai 3", "Dragon Ball Z: Budokai Tenkaichi 2", "Driver: Parallel Lines",
+            "Dynasty Warriors 5", "Fatal Frame II: Crimson Butterfly", "FIFA Street", "FIFA Street 2", "Final Fantasy XII",
+            "FlatOut 2", "G-Force", "Ghost Rider", "God Hand", "God of War",
+            "God of War II", "Gran Turismo 3: A-Spec", "Grand Theft Auto: Liberty City Stories", "Grand Theft Auto: Vice City", "Grand Theft Auto III",
+            "Grand Theft Auto: San Andreas", "Guitar Hero II", "Guitar Hero III (Brazucas)", "Ico", "Jackass: The Game",
+            "Jak 3", "Jak and Daxter: The Precursor Legacy", "Kingdom Hearts II", "LEGO Batman: The Videogame", "LEGO Indiana Jones",
+            "Mafia", "Manhunt", "Manhunt 2", "Marvel vs. Capcom 2", "Max Payne",
+            "Max Payne 2: The Fall of Max Payne", "Medal of Honor: European Assault", "Medal of Honor: Frontline", "Medal of Honor: Rising Sun", "Mercenaries: Playground of Destruction",
+            "Metal Gear Solid 2: Sons of Liberty", "Metal Slug Anthology", "Midnight Club 3: DUB Edition", "Mortal Kombat: Deadly Alliance", "Mortal Kombat: Deception",
+            "Mortal Kombat: Shaolin Monks", "Naruto: Ultimate Ninja", "Naruto: Ultimate Ninja 2", "Naruto: Ultimate Ninja 3", "Naruto: Uzumaki Chronicles",
+            "Naruto: Uzumaki Chronicles 2", "Naruto Shippuden: Ultimate Ninja 4", "Need for Speed: Carbon", "Need for Speed: Hot Pursuit 2", "Need for Speed: Most Wanted",
+            "Need for Speed: ProStreet", "Need for Speed: Undercover", "Need for Speed: Underground", "Need for Speed: Underground 2", "Obscure",
+            "Okami", "One Piece: Grand Adventure", "OutRun 2006: Coast 2 Coast", "Pac-Man World 2", "Peter Jackson's King Kong",
+            "The Punisher", "Ratatouille", "Ratchet & Clank", "Red Dead Revolver", "Resident Evil Code: Veronica X",
+            "Resident Evil: Outbreak", "Resident Evil 4", "Rumble Racing", "Scarface: The World is Yours", "Scooby-Doo! First Frights",
+            "Shadow of the Colossus", "Shrek 2", "Silent Hill 2", "Silent Hill 3", "Silent Hill 4: The Room",
+            "Silent Hill: Origins", "The Simpsons: Hit & Run", "Sly 2: Band of Thieves", "Sly 3: Honor Among Thieves", "SOCOM II: U.S. Navy SEALs",
+            "Sonic Riders", "Sonic Unleashed", "Spider-Man 2", "SpongeBob SquarePants: Battle for Bikini Bottom", "Star Wars: Battlefront II",
+            "Super Bomba Patch 2025", "Taz Wanted", "Teen Titans", "Teenage Mutant Ninja Turtles", "Tekken 4",
+            "Tekken 5", "Tomb Raider: Underworld", "Tony Hawk's American Wasteland", "Tony Hawk's Pro Skater 3", "Tony Hawk's Pro Skater 4",
+            "Tony Hawk's Underground 2", "Transformers", "True Crime: New York City", "True Crime: Streets of LA", "Valkyrie Profile 2: Silmeria",
+            "Vanguard", "Viewtiful Joe", "The Warriors", "Woody Woodpecker: Escape from Buzz Buzzard Park", "Winning Eleven 10",
+            "X-Men Legends II: Rise of Apocalypse", "Yu-Gi-Oh! The Duelists of the Roses"
         ].sort();
 
         let selectedGames = new Set();
