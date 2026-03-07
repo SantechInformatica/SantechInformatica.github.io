@@ -3,10 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Catálogo de Jogos</title>
+    <title>Catálogo de Xbox 360</title>
     <style>
         :root {
-            --primary: #107C10;
+            --primary: #107C10; /* Verde do Xbox */
+            --primary-hover: #0c5e0c;
             --bg: #121212;
             --card-bg: #1E1E1E;
             --text: #FFFFFF;
@@ -17,7 +18,7 @@
             color: var(--text);
             margin: 0;
             padding: 0;
-            padding-bottom: 100px; /* Espaço maior para a barra inferior */
+            padding-bottom: 140px; 
         }
         header {
             background-color: var(--primary);
@@ -33,10 +34,15 @@
             flex-direction: column;
             gap: 10px;
         }
-        .search-bar {
+        .controls-container {
+            display: flex;
+            gap: 10px;
             width: 90%;
-            max-width: 400px;
+            max-width: 500px;
             margin: 0 auto;
+        }
+        .search-bar {
+            flex-grow: 1;
             padding: 8px 15px;
             border-radius: 20px;
             border: none;
@@ -44,6 +50,16 @@
             font-size: 1rem;
             background-color: #FFFFFF;
             color: #000000;
+        }
+        .sort-select {
+            padding: 8px 10px;
+            border-radius: 20px;
+            border: none;
+            outline: none;
+            font-size: 0.9rem;
+            background-color: #e0e0e0;
+            color: #000000;
+            cursor: pointer;
         }
         .container {
             display: grid;
@@ -64,8 +80,9 @@
         }
         .game-card.selected {
             border-color: var(--primary);
-            box-shadow: 0 0 15px rgba(16, 124, 16, 0.5);
+            box-shadow: 0 0 15px rgba(16, 124, 16, 0.6);
             transform: scale(0.98);
+            background-color: #1a2a1a;
         }
         .game-card img {
             width: 100%;
@@ -79,8 +96,21 @@
             font-size: 0.9rem;
             flex-grow: 1;
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
+        }
+        .game-size {
+            font-size: 0.75rem;
+            color: #888;
+            margin-top: 5px;
+            background: #222;
+            padding: 2px 8px;
+            border-radius: 10px;
+        }
+        .game-card.selected .game-size {
+            color: #86efac;
+            background: rgba(16, 124, 16, 0.5);
         }
         .check-icon {
             position: absolute;
@@ -102,7 +132,6 @@
             opacity: 1;
         }
         
-        /* Seção de jogos personalizados */
         .custom-games-section {
             padding: 20px 15px;
             background-color: #1a1a1a;
@@ -113,7 +142,7 @@
         .custom-games-section h3 {
             margin-top: 0;
             font-size: 1.1rem;
-            color: var(--primary);
+            color: #4ade80;
         }
         .custom-games-section p {
             font-size: 0.9rem;
@@ -142,12 +171,51 @@
             left: 0;
             right: 0;
             background-color: var(--card-bg);
-            padding: 15px;
+            padding: 12px 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            box-shadow: 0 -5px 15px rgba(0,0,0,0.7);
+        }
+        .storage-section {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .storage-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            box-shadow: 0 -2px 10px rgba(0,0,0,0.5);
+            font-size: 0.9rem;
         }
+        .storage-select {
+            background: #333;
+            color: white;
+            border: 1px solid #555;
+            border-radius: 4px;
+            padding: 4px;
+            font-size: 0.85rem;
+            outline: none;
+        }
+        .progress-bg {
+            width: 100%;
+            height: 8px;
+            background: #333;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%;
+            background: #25D366;
+            width: 0%;
+            transition: width 0.3s ease, background-color 0.3s ease;
+        }
+        .bottom-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
         .whatsapp-btn {
             background-color: #25D366;
             color: white;
@@ -164,7 +232,6 @@
         .whatsapp-btn:hover { background-color: #1DA851; }
         .hidden { display: none !important; }
 
-        /* Estilo da notificação (Toast) */
         #toast {
             visibility: hidden;
             min-width: 250px;
@@ -176,7 +243,7 @@
             position: fixed;
             z-index: 1000;
             left: 50%;
-            bottom: 80px;
+            bottom: 120px;
             transform: translateX(-50%);
             font-size: 15px;
             border-left: 5px solid #25D366;
@@ -189,10 +256,10 @@
         }
         @keyframes fadein {
             from {bottom: 0; opacity: 0;}
-            to {bottom: 80px; opacity: 1;}
+            to {bottom: 120px; opacity: 1;}
         }
         @keyframes fadeout {
-            from {bottom: 80px; opacity: 1;}
+            from {bottom: 120px; opacity: 1;}
             to {bottom: 0; opacity: 0;}
         }
     </style>
@@ -200,75 +267,263 @@
 <body>
 
     <header>
-        <div>Catálogo de Jogos</div>
-        <input type="text" id="search-input" class="search-bar" placeholder="Buscar jogo..." onkeyup="filterGames()">
+        <div>Catálogo de Xbox 360</div>
+        <div class="controls-container">
+            <input type="text" id="search-input" class="search-bar" placeholder="Buscar jogo..." onkeyup="applySortAndFilter()">
+            <select id="sort-select" class="sort-select" onchange="applySortAndFilter()">
+                <option value="az">A-Z</option>
+                <option value="za">Z-A</option>
+                <option value="size-asc">Menor Tamanho</option>
+                <option value="size-desc">Maior Tamanho</option>
+            </select>
+        </div>
     </header>
 
     <div class="container" id="game-container"></div>
 
     <div class="custom-games-section">
         <h3>Não achou o jogo que queria?</h3>
-        <p>Escreva o nome de outros jogos abaixo. Verificaremos a disponibilidade para você!</p>
-        <textarea id="custom-games-input" rows="3" placeholder="Ex: Need for Speed Underground 2, Black..."></textarea>
+        <p>Escreva o nome de outros jogos de Xbox 360 abaixo. Verificaremos a disponibilidade para você!</p>
+        <textarea id="custom-games-input" rows="3" placeholder="Ex: Call of Duty, Halo..."></textarea>
     </div>
 
     <div class="bottom-bar">
-        <span id="counter-text">0 selecionados</span>
-        <button class="whatsapp-btn" onclick="copyToClipboard()">
-            📋 Copiar Lista
-        </button>
+        <div class="storage-section">
+            <div class="storage-header">
+                <span>Espaço Ocupado: <strong id="storage-text">0.0 GB</strong></span>
+                <select id="storage-select" class="storage-select" onchange="updateCounter()">
+                    <option value="7450000000">Pen Drive 8GB</option>
+                    <option value="14900000000">Pen Drive 16GB</option>
+                    <option value="29800000000">Pen Drive 32GB</option>
+                    <option value="59600000000" selected>Pen Drive 64GB</option>
+                    <option value="119200000000">Pen Drive 128GB</option>
+                    <option value="232800000000">HD 250GB</option>
+                    <option value="465600000000">HD 500GB</option>
+                    <option value="931300000000">HD 1TB</option>
+                </select>
+            </div>
+            <div class="progress-bg">
+                <div class="progress-fill" id="progress-fill"></div>
+            </div>
+        </div>
+
+        <div class="bottom-actions">
+            <span id="counter-text" style="font-weight: bold; color: #4ade80;">0 selecionados</span>
+            <button class="whatsapp-btn" onclick="copyToClipboard()">
+                📋 Copiar Lista
+            </button>
+        </div>
     </div>
 
     <div id="toast">Lista copiada com sucesso!<br>Agora é só colar na conversa do WhatsApp.</div>
 
-<script>
-        const gamesList = [
-            "007: Blood Stone", "GoldenEye 007: Reloaded", "Minecraft: Xbox 360 Edition",
-            "Alan Wake", "Altered Beast", "Armored Core 4", "Army of Two: The Devil's Cartel",
-            "Assassin's Creed", "Assassin's Creed II", "Assassin's Creed: Brotherhood", "Assassin's Creed IV: Black Flag",
-            "Pirates of the Caribbean: At World's End", "Banjo-Kazooie", "Batman: Arkham Asylum", "Batman: Arkham City",
-            "Battlefield: Bad Company", "Battlefield 4", "Bayonetta", "Bee Movie Game", "Beyond Good & Evil HD",
-            "BioShock 2", "BioShock Infinite", "Borderlands 2", "Brothers: A Tale of Two Sons", "Brütal Legend",
-            "Bully: Scholarship Edition", "Burnout CRASH!", "Burnout Paradise", "Cabela's Dangerous Hunts 2009",
-            "Call of Duty Classic", "Call of Duty 4: Modern Warfare", "Call of Duty: Modern Warfare 2",
-            "Call of Duty: Black Ops", "Call of Duty: Black Ops II", "Call of Juarez", "Call of Juarez: The Cartel",
-            "Capcom Arcade Cabinet", "Cars 2", "Castle Crashers", "Castle of Illusion", "Castlevania HD",
-            "Castlevania: Symphony of the Night", "Chavo Kart", "Choplifter HD", "Clash of the Titans", "Contra",
-            "Crash of the Titans", "Crysis 2", "Dante's Inferno", "Dark Souls: Prepare to Die Edition",
-            "Darkstalkers Resurrection", "Daytona USA", "Dragon Ball Z: Budokai HD Collection", "Dead Island",
-            "Dead or Alive 3", "Dead or Alive 5", "Dead Rising 2", "Deadfall Adventures", "Devil May Cry 4",
-            "Devil May Cry HD Collection", "Diablo III: Reaper of Souls", "DiRT 2", "DiRT 3", "Dishonored",
-            "Disney Universe", "Double D Dodgeball", "Double Dragon", "Double Dragon II: Wander of the Dragons",
-            "Double Dragon Neon", "DuckTales: Remastered", "Dungeons & Dragons: Chronicles of Mystara",
-            "Epic Mickey 2: The Power of Two", "A Era do Gelo 3", "F1 2014", "Fable III", "Fallout: New Vegas",
-            "Far Cry 3", "Far Cry 4", "Fatal Fury Special", "F.E.A.R. 3", "FIFA 14", "FIFA Street", "FIFA Street 3",
-            "Final Fight: Double Impact", "Flashback", "FlatOut", "Forza Motorsport 4", "Forza Horizon 2", "FUEL",
-            "Gauntlet", "Gears of War 3", "Giana Sisters: Twisted Dreams", "Golden Axe", "GRID 2",
-            "Grand Theft Auto: San Andreas", "Grand Theft Auto IV", "Grand Theft Auto V", "Guitar Hero II", "GUN",
-            "Halo 3", "I Am Alive", "Injustice: Gods Among Us Ultimate Edition", "Just Cause 2", "Killer is Dead",
-            "Left 4 Dead", "Left 4 Dead 2", "LEGO Indiana Jones 2", "LEGO Jurassic World", "LEGO Marvel Super Heroes",
-            "Life Is Strange", "Lollipop Chainsaw", "Marvel: Ultimate Alliance", "Marvel: Ultimate Alliance 2",
-            "Ultimate Marvel vs. Capcom 3", "Mass Effect 3", "Max Payne 3", "Medal of Honor: Airborne",
-            "Medal of Honor: Limited Edition", "Mega Man 9", "Mega Man 10", "Metal Gear Solid V: The Phantom Pain",
-            "Metal Slug 3", "Metal Slug XX", "Metro: Last Light", "Midnight Club: Los Angeles", "Mirror's Edge",
-            "Ultimate Mortal Kombat 3", "Mortal Kombat 9: Komplete Edition", "Mortal Kombat Arcade Kollection",
-            "Mortal Kombat vs. DC Universe", "MotoGP 15", "MX vs. ATV Alive", "NBA 2K18", "Need for Speed: Carbon",
-            "Need for Speed: Most Wanted", "Need for Speed: Rivals", "Need for Speed: Shift",
-            "Ninja Gaiden 3: Razor's Edge", "The Amazing Spider-Man 2", "Payday 2", "Pro Evolution Soccer 2018",
-            "Plants vs. Zombies: Garden Warfare", "Portal 2", "Prince of Persia", "Prince of Persia: The Forgotten Sands",
-            "R-Type Dimensions", "Raiden Fighters Aces", "Rayman 3 HD", "Rayman Origins",
-            "Red Dead Redemption + Undead Nightmare", "Resident Evil 4", "Resident Evil 5", "Resident Evil 6",
-            "Rise of the Tomb Raider", "Saints Row 2", "Saints Row: Gat out of Hell", "Samurai Shodown II",
-            "Shadowrun", "Shinobi", "Shrek the Third", "Silent Hill: Downpour", "Skate 3",
-            "The Elder Scrolls V: Skyrim", "Sleeping Dogs", "Sniper Elite V2", "Sniper: Ghost Warrior 2",
-            "Sonic & All-Stars Racing Transformed", "Sonic Generations", "Soulcalibur", "State of Decay",
-            "Super Street Fighter II Turbo HD Remix", "Street Fighter II' Hyper Fighting", "Ultra Street Fighter IV",
-            "Streets of Rage 2", "Terraria", "The Elder Scrolls IV: Oblivion", "The Godfather",
-            "The King of Fighters XIII", "The Walking Dead: Survival Instinct", "Tomb Raider", "Toy Story 3",
-            "UFC Undisputed 3", "Watch Dogs"
-        ].sort();
+    <script>
+        // =====================================================================
+        // 🎮 ÁREA FÁCIL PARA ADICIONAR NOVOS JOGOS (Xbox 360)
+        // =====================================================================
+        const rawGamesList = [
+            { name: "007 Bloodstone", size: 7089991680 },
+            { name: "007 GoldenEye Reloaded", size: 8139096064 },
+            { name: "545408A7 (GTA V Content)", size: 8258232320 },
+            { name: "Alan Wake", size: 6650433471 },
+            { name: "Altered Beast", size: 16867328 },
+            { name: "Arcade Live Pack", size: 6013306952 },
+            { name: "Armored Core 4", size: 6719782912 },
+            { name: "Army of Two The Devils Cartel", size: 7930634240 },
+            { name: "Assassin's Creed", size: 7046529024 },
+            { name: "Assassin's Creed 2", size: 4927774720 },
+            { name: "Assassin's Creed Brotherhood", size: 6151086080 },
+            { name: "Assassin's Creed IV - Black Flag", size: 6863970304 },
+            { name: "At World's End Piratas do Caribe", size: 6863527936 },
+            { name: "Banjo-Kazooie", size: 50237440 },
+            { name: "Batman - Arkham Asylum", size: 7163670528 },
+            { name: "Batman Arkham City", size: 8316973056 },
+            { name: "Battlefield 4", size: 7016861696 },
+            { name: "BAYONETTA", size: 7376482304 },
+            { name: "Bee Movie", size: 3290353664 },
+            { name: "Beyond Good & Evil HD", size: 1799557120 },
+            { name: "BF BAD COMPANY", size: 5286146048 },
+            { name: "BioShock 2", size: 6877560832 },
+            { name: "Bioshock Infinte", size: 7069577216 },
+            { name: "Borderlands 2", size: 6043475968 },
+            { name: "Brothers A Tale of Two Sons", size: 694673408 },
+            { name: "Brutal Legend", size: 6371950592 },
+            { name: "Bully - Scholarship Edition", size: 3179724800 },
+            { name: "Burnout CRASH!", size: 1126445056 },
+            { name: "Burnout Paradise", size: 3014041600 },
+            { name: "Cabellas Dangerous 2009", size: 3454091264 },
+            { name: "Call of Duty - Black Ops", size: 7309672448 },
+            { name: "Call of Duty - Modern Warfare 2", size: 7291576320 },
+            { name: "Call of Duty Black OPS 2 BR", size: 8001900544 },
+            { name: "Call of Duty Classic", size: 1327714304 },
+            { name: "Call of Juarez", size: 6300266496 },
+            { name: "Call of Juarez The Cartel", size: 6541500416 },
+            { name: "Capcom Arcarde Cabinet", size: 1272991744 },
+            { name: "Cars 2", size: 3091308544 },
+            { name: "Castle Crashers", size: 146616320 },
+            { name: "Castle of Illusion", size: 399634432 },
+            { name: "Castlevania HD", size: 377905152 },
+            { name: "Castlevania SOTN", size: 99901440 },
+            { name: "Chavo Kart", size: 1922338816 },
+            { name: "Choplifter HD", size: 1464938496 },
+            { name: "Clash of the Titans", size: 4291457024 },
+            { name: "COD4", size: 6977609728 },
+            { name: "Contra", size: 33992704 },
+            { name: "Crash of the Titans", size: 3250024448 },
+            { name: "Crysis2", size: 5884567552 },
+            { name: "Dante's Inferno", size: 5932048384 },
+            { name: "Dark Souls Prepare to Die", size: 4389249024 },
+            { name: "Darkstalkers Resurrection", size: 388988928 },
+            { name: "DAYTONA USA", size: 240058368 },
+            { name: "DBZ BUDOKAI HD", size: 4386660352 },
+            { name: "Dead Island", size: 4135071744 },
+            { name: "Dead or Alive 3", size: 4191140992 },
+            { name: "Dead or Alive5", size: 5175386112 },
+            { name: "Dead Rising 2", size: 6593490944 },
+            { name: "Deadfall Adventures", size: 3205160960 },
+            { name: "Devil May Cry 4", size: 6959661056 },
+            { name: "Diablo 3 Reaper of Souls PTBR", size: 7919529514 },
+            { name: "DiRT 2", size: 6897680384 },
+            { name: "Dirt 3", size: 6460411904 },
+            { name: "Dishonored", size: 5019086848 },
+            { name: "Disney Universe", size: 6011879424 },
+            { name: "DMC HD COLLECTION", size: 7224995840 },
+            { name: "Double D Dodgeball", size: 17944576 },
+            { name: "Double Dragon", size: 24977408 },
+            { name: "Double Dragon II Wander of The Dragons", size: 653266944 },
+            { name: "Double Dragon Neon", size: 2405150720 },
+            { name: "Duck Tales Remastered", size: 710729728 },
+            { name: "Dungeons & Dragons Chronicles of Mystara", size: 267137024 },
+            { name: "Epic Mickey 2", size: 7013253120 },
+            { name: "Era do Gelo 3", size: 4506345472 },
+            { name: "F1 2014", size: 4223799296 },
+            { name: "Fable3", size: 6005751808 },
+            { name: "Fallout - New Vegas", size: 5089927168 },
+            { name: "Far Cry 3", size: 6225879040 },
+            { name: "Far cry4", size: 7331147776 },
+            { name: "Fatal Fury Special", size: 24387584 },
+            { name: "FEAR 3", size: 12887741062 },
+            { name: "FIFA 2014", size: 6289870848 },
+            { name: "Fifa ptbr", size: 6217691136 },
+            { name: "Fifa Streat", size: 4682661888 },
+            { name: "FIFA Street 3", size: 2445295616 },
+            { name: "Final Fight Double Impact", size: 201388032 },
+            { name: "Flashback", size: 2118983680 },
+            { name: "Flatout", size: 4645203968 },
+            { name: "Forza Horizon 2", size: 7800000000 },
+            { name: "Forza Motorsport 4", size: 13453959168 },
+            { name: "FUEL", size: 4020551680 },
+            { name: "Gauntlet", size: 36196352 },
+            { name: "Gears of War 3", size: 7967166464 },
+            { name: "Giana Sisters Twisted Dreams", size: 1771929600 },
+            { name: "Golden Axe", size: 60919808 },
+            { name: "Grid 2", size: 5969829888 },
+            { name: "GTA IV", size: 6990495744 },
+            { name: "GTA SA", size: 2213040128 },
+            { name: "GTA V", size: 8342560768 },
+            { name: "Guitar Hero 2", size: 2829754368 },
+            { name: "GUN", size: 2282774528 },
+            { name: "Halo 3", size: 6140334080 },
+            { name: "I Am Alive", size: 1996177408 },
+            { name: "Injustice Ultimate Edition", size: 8165351708 },
+            { name: "Just Cause 2", size: 4381601792 },
+            { name: "Killer is Dead", size: 4985835520 },
+            { name: "Left 4 Dead 2", size: 4680888320 },
+            { name: "Left4Dead", size: 4060053504 },
+            { name: "LEGO Indiana Jones 2", size: 6009331712 },
+            { name: "LEGO Jurassic World", size: 7339409408 },
+            { name: "LEGO Marvel Super Heroes", size: 5680390144 },
+            { name: "Life Is Strange Completo PT", size: 9375019008 },
+            { name: "Lollipop Chainsaw", size: 5400059904 },
+            { name: "Marvel Ultimate Alliance 2", size: 7116861440 },
+            { name: "Marvel Ultimate Allience", size: 5969436672 },
+            { name: "Marvel vs Capcom 3 Ultimate", size: 3369598976 },
+            { name: "Mass Effect 3", size: 8073039872 },
+            { name: "Max Payne 3", size: 17677135872 },
+            { name: "Medal Of Honor Airborne", size: 6367215616 },
+            { name: "Medal of Honor Limited Edition", size: 5924937728 },
+            { name: "MEGA MAN 10 ROCKMAN 10", size: 203362304 },
+            { name: "MEGA MAN 9", size: 92971008 },
+            { name: "Metal Gear Solid V Phantom Pain", size: 12960585266 },
+            { name: "Metal Slug 3", size: 47284224 },
+            { name: "Metal Slug XX", size: 189018112 },
+            { name: "Metro Last Night", size: 6555398144 },
+            { name: "Midnight Club Los Angeles", size: 7610167296 },
+            { name: "Minecraft", size: 2002391040 },
+            { name: "Mirror's Edge", size: 5952561152 },
+            { name: "Mortal Kombat 3 Ultimate", size: 45686784 },
+            { name: "Mortal Kombat 9 Komplete Edition", size: 7309099008 },
+            { name: "Mortal Kombat Arcade Kollection", size: 247857152 },
+            { name: "Mortal Kombat vs. DC Universe", size: 6452109312 },
+            { name: "MotoGP 15", size: 7846047744 },
+            { name: "MX vs ATV Alive", size: 2876759408 },
+            { name: "NBA 2k18", size: 7855325184 },
+            { name: "Need for Speed Carbon", size: 5391151104 },
+            { name: "Need For Speed Most Wanted", size: 7041282048 },
+            { name: "Need For Speed Rivals", size: 7409693032 },
+            { name: "Need for Speed SHIF", size: 4507975680 },
+            { name: "Ninja Gaiden 3 Razor's Edge", size: 4641103872 },
+            { name: "O Espetacular Homem-Aranha 2", size: 7180345344 },
+            { name: "Payday 2", size: 4884598784 },
+            { name: "Pes 2018", size: 7906893824 },
+            { name: "Plants vs. Zombies Garden Warfare", size: 8189931520 },
+            { name: "Portal 2", size: 6428352512 },
+            { name: "Prince of Persia", size: 104529920 },
+            { name: "Prince of Persia The Forgotten Sands", size: 4924174336 },
+            { name: "R Type Dimensions", size: 156016640 },
+            { name: "Raiden Fighters Aces", size: 507408384 },
+            { name: "Rayman 3 HD", size: 2095038464 },
+            { name: "Rayman Origins", size: 5964496896 },
+            { name: "Red Dead Redemption e Undead", size: 14406574080 },
+            { name: "Resident Evil 4", size: 3834286080 },
+            { name: "Resident Evil 5", size: 7241949184 },
+            { name: "Resident evil 6", size: 8230326272 },
+            { name: "Rise of The Tomb Raider", size: 6712299520 },
+            { name: "Saint Row 2", size: 7253692416 },
+            { name: "Saints Row Gat out of Hell", size: 5397934080 },
+            { name: "Samurai Shodown II", size: 67956736 },
+            { name: "Shadowrun", size: 3325517824 },
+            { name: "Shinobi", size: 15339520 },
+            { name: "Shrek The Third", size: 6447419392 },
+            { name: "Silent Hill Downpour", size: 4840873984 },
+            { name: "Skate 3", size: 6436782080 },
+            { name: "SKYRIM PTBR", size: 4062126080 },
+            { name: "Sleeping Dogs", size: 12993789484 },
+            { name: "Sniper Elite V2", size: 3472769024 },
+            { name: "Sniper Ghost Warrior 2", size: 4038197248 },
+            { name: "Sonic All-Stars Racer Transformed", size: 4971458560 },
+            { name: "Sonic Generations", size: 7850639360 },
+            { name: "Soul Calibur", size: 197423104 },
+            { name: "State of Decay", size: 2729725952 },
+            { name: "Street Fighter 2 TURBO HD", size: 385478656 },
+            { name: "Street Fighter II' HF", size: 51093504 },
+            { name: "Street Fighter IV Ultra", size: 8208474112 },
+            { name: "Streets of Rage 2", size: 28909568 },
+            { name: "Terraria", size: 50274304 },
+            { name: "The Elder Scrolls IV - Oblivion", size: 6297542656 },
+            { name: "The Godfather", size: 6111318016 },
+            { name: "The King of Fighters XIII", size: 2220560384 },
+            { name: "The Walking Dead Survival Instinct", size: 5668769792 },
+            { name: "Tomb Raider", size: 7051046912 },
+            { name: "Toy Story 3", size: 5185212416 },
+            { name: "UFC Undisputed 3", size: 6979502080 },
+            { name: "Watch Dogs", size: 8707870720 }
+        ];
+
+        // =====================================================================
+        // LÓGICA DO CATÁLOGO
+        // =====================================================================
+        const DEFAULT_SIZE = 8000000000; // 8 GB padrão para jogo de 360 sem tamanho
+        
+        let processedGames = rawGamesList.map(game => {
+            return {
+                name: game.name,
+                size: game.size || DEFAULT_SIZE
+            };
+        });
 
         let selectedGames = new Set();
+        let currentDisplayedGames = [...processedGames];
 
         function getBingCoverUrl(gameName) {
             const searchQuery = encodeURIComponent(gameName + " xbox 360 capa");
@@ -277,35 +532,52 @@
 
         function renderGames() {
             const container = document.getElementById('game-container');
+            container.innerHTML = '';
             
-            gamesList.forEach((game, index) => {
+            currentDisplayedGames.forEach((game, index) => {
                 const card = document.createElement('div');
                 card.className = 'game-card';
-                card.id = `card-${index}`;
-                card.onclick = () => toggleSelection(card, game);
+                if (selectedGames.has(game.name)) card.classList.add('selected');
+                
+                card.onclick = () => toggleSelection(card, game.name);
 
-                const coverUrl = getBingCoverUrl(game);
+                const coverUrl = getBingCoverUrl(game.name);
+                let sizeText = "";
+                // Se for muito pequeno (arcade), mostra em MB, senão em GB
+                if (game.size < 1000000000) {
+                    sizeText = (game.size / 1000000).toFixed(0) + " MB";
+                } else {
+                    sizeText = (game.size / 1000000000).toFixed(1) + " GB";
+                }
 
                 card.innerHTML = `
                     <div class="check-icon">✓</div>
-                    <img src="${coverUrl}" alt="${game}" loading="lazy">
-                    <div class="game-info">${game}</div>
+                    <img src="${coverUrl}" alt="${game.name}" loading="lazy">
+                    <div class="game-info">
+                        ${game.name}
+                        <div class="game-size">${sizeText}</div>
+                    </div>
                 `;
                 container.appendChild(card);
             });
         }
 
-        function filterGames() {
+        function applySortAndFilter() {
             const searchText = document.getElementById('search-input').value.toLowerCase();
-            const cards = document.getElementsByClassName('game-card');
+            const sortType = document.getElementById('sort-select').value;
             
-            gamesList.forEach((game, index) => {
-                if (game.toLowerCase().includes(searchText)) {
-                    cards[index].classList.remove('hidden');
-                } else {
-                    cards[index].classList.add('hidden');
-                }
+            let filtered = processedGames.filter(game => game.name.toLowerCase().includes(searchText));
+            
+            filtered.sort((a, b) => {
+                if (sortType === 'az') return a.name.localeCompare(b.name);
+                if (sortType === 'za') return b.name.localeCompare(a.name);
+                if (sortType === 'size-asc') return a.size - b.size;
+                if (sortType === 'size-desc') return b.size - a.size;
+                return 0;
             });
+
+            currentDisplayedGames = filtered;
+            renderGames();
         }
 
         function toggleSelection(card, gameName) {
@@ -320,7 +592,35 @@
         }
 
         function updateCounter() {
+            let totalBytes = 0;
+            selectedGames.forEach(gameName => {
+                const game = processedGames.find(g => g.name === gameName);
+                if (game) totalBytes += game.size;
+            });
+
+            const selectElem = document.getElementById('storage-select');
+            const maxBytesReal = parseInt(selectElem.value);
+            
+            const totalGB = (totalBytes / 1000000000).toFixed(1);
+            const maxGB = (maxBytesReal / 1000000000).toFixed(1);
+            
+            document.getElementById('storage-text').innerText = `${totalGB} GB / ${maxGB} GB Livre`;
             document.getElementById('counter-text').innerText = `${selectedGames.size} selecionado${selectedGames.size !== 1 ? 's' : ''}`;
+
+            let percentage = (totalBytes / maxBytesReal) * 100;
+            const fillElem = document.getElementById('progress-fill');
+            fillElem.style.width = Math.min(percentage, 100) + '%';
+            
+            if (percentage > 100) {
+                fillElem.style.backgroundColor = '#dc2626'; 
+                document.getElementById('storage-text').style.color = '#dc2626';
+            } else if (percentage > 85) {
+                fillElem.style.backgroundColor = '#eab308'; 
+                document.getElementById('storage-text').style.color = 'inherit';
+            } else {
+                fillElem.style.backgroundColor = '#25D366'; 
+                document.getElementById('storage-text').style.color = 'inherit';
+            }
         }
 
         function showToast() {
@@ -329,12 +629,9 @@
             setTimeout(function(){ toast.className = toast.className.replace("show", ""); }, 4000);
         }
 
-        // Função "Plano B" para navegadores antigos ou arquivos locais
         function fallbackCopyTextToClipboard(text) {
             var textArea = document.createElement("textarea");
             textArea.value = text;
-            
-            // Evita rolar a tela
             textArea.style.top = "0";
             textArea.style.left = "0";
             textArea.style.position = "fixed";
@@ -345,13 +642,10 @@
 
             try {
                 var successful = document.execCommand('copy');
-                if (successful) {
-                    showToast();
-                } else {
-                    alert("Seu navegador bloqueou a cópia. Por favor, selecione e copie o texto manualmente.");
-                }
+                if (successful) showToast();
+                else alert("Seu navegador bloqueou a cópia. Copie manualmente.");
             } catch (err) {
-                alert("Erro ao copiar. Por favor, selecione e copie manualmente.");
+                alert("Erro ao copiar. Copie manualmente.");
             }
 
             document.body.removeChild(textArea);
@@ -365,13 +659,21 @@
                 return;
             }
 
-            let message = "Olá! Gostaria de solicitar os seguintes jogos:\n\n";
+            let totalBytes = 0;
+            selectedGames.forEach(gameName => {
+                const game = processedGames.find(g => g.name === gameName);
+                if (game) totalBytes += game.size;
+            });
+            const totalGB = (totalBytes / 1000000000).toFixed(1);
+
+            let message = "Olá! Gostaria de solicitar os seguintes jogos de Xbox 360:\n\n";
             
             if (selectedGames.size > 0) {
-                message += "🎮 *Jogos do Catálogo:*\n";
+                message += "🎮 *Jogos do Catálogo (Xbox 360):*\n";
                 selectedGames.forEach(game => {
                     message += `- ${game}\n`;
                 });
+                message += `\n💾 *Tamanho Estimado:* ${totalGB} GB\n`;
             }
 
             if (customGamesText !== "") {
@@ -379,21 +681,19 @@
                 message += customGamesText + "\n";
             }
 
-            // Tenta o jeito moderno primeiro (se tiver permissão e HTTPS)
             if (navigator.clipboard && window.isSecureContext) {
                 navigator.clipboard.writeText(message).then(() => {
                     showToast();
                 }).catch(err => {
-                    // Se o moderno falhar, tenta o Plano B
                     fallbackCopyTextToClipboard(message);
                 });
             } else {
-                // Se não tiver HTTPS ou suporte moderno, vai direto pro Plano B
                 fallbackCopyTextToClipboard(message);
             }
         }
 
-        renderGames();
+        applySortAndFilter();
+        updateCounter();
     </script>
 </body>
 </html>
